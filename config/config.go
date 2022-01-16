@@ -16,14 +16,12 @@ type Config struct {
 }
 
 type GlobalConfig struct {
-	ConfigVersion          int           `yaml:"config_version,omitempty"`
-	RetentionCheckInterval time.Duration `yaml:"retention_check_interval,omitempty"` // implicitly parsed with time.ParseDuration()
+	ConfigVersion   int           `yaml:"config_version,omitempty"`
+	RefreshInterval time.Duration `yaml:"refresh_interval,omitempty"` // implicitly parsed with time.ParseDuration()
 }
 
 type ElasticsearchConfig struct {
-	Protocol string `yaml:",omitempty"`
-	Host     string `yaml:",omitempty"`
-	Port     string `yaml:",omitempty"`
+	Hosts []string `yaml:",omitempty"`
 }
 
 type MetricConfig struct {

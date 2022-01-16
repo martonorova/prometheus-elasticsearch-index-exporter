@@ -4,10 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"prometheus-elasticsearch-index-exporter/config"
-	"prometheus-elasticsearch-index-exporter/exporter"
 	"strings"
 	"time"
+
+	"github.com/martonorova/prometheus-elasticsearch-index-exporter/config"
+	"github.com/martonorova/prometheus-elasticsearch-index-exporter/exporter"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -57,22 +58,30 @@ func main() {
 	fmt.Print(startMsg(cfg, httpHandlers))
 	serverErrors := startServer(cfg.Server, httpHandlers)
 
-	retentionTicker := time.NewTicker(cfg.Global.RetentionCheckInterval)
+	// init elasticsearch client
+	// _, elasticErrors, err := exporter.NewElasticsearchClient(cfg.Elasticsearch)
+	_, elasticErrors, err := exporter.NewElasticsearchClient(cfg.Elasticsearch)
+	exitOnError(err)
+
+	refreshTicker := time.NewTicker(cfg.Global.RefreshInterval)
 
 	for {
 		select {
 		case err := <-serverErrors:
 			exitOnError(fmt.Errorf("server error: %v", err.Error()))
-		case <-retentionTicker.C:
-			fmt.Println("Retention Ticker")
-			// for _, metric := range metrics {
-			// 	err = metric.ProcessRetention()
-			// 	if err != nil {
-			// 		fmt.Fprintf(os.Stderr, "WARNING: error while processing retention on metric %v: %v", metric.Name(), err)
-			// 		nErrorsByMetric.WithLabelValues(metric.Name()).Inc()
-			// 	}
-			// }
+		case <-refreshTicker.C:
+			fmt.Println("Refresh Ticker")
+		// for _, metric := range metrics {
+		// 	err = metric.ProcessRetention()
+		// 	if err != nil {
+		// 		fmt.Fprintf(os.Stderr, "WARNING: error while processing retention on metric %v: %v", metric.Name(), err)
+		// 		nErrorsByMetric.WithLabelValues(metric.Name()).Inc()
+		// 	}
+		// }
+		case err := <-elasticErrors:
+			exitOnError(fmt.Errorf("elasticsearch error: %v", err.Error()))
 		}
+
 	}
 }
 

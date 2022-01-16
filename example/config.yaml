@@ -1,10 +1,9 @@
 global:
   config_version: 1 # not used yet
-  retention_check_interval: 53s # the interval at which the exporter checks for expired metrics
+  refresh_interval: 53s # the interval at which the exporter checks for expired metrics
 elasticsearch:
-  protocol: http
-  host: es01
-  port: 9200
+  hosts:
+    - http://es01:9200
 metrics:
 - type: counter
   name: error_request
