@@ -1,0 +1,25 @@
+global:
+  config_version: 1 # not used yet
+  retention_check_interval: 53s # the interval at which the exporter checks for expired metrics
+elasticsearch:
+  protocol: http
+  host: es01
+  port: 9200
+metrics:
+- type: counter
+  name: error_request
+  help: Number of error request7
+  # query in Elasticsearch Query DSL syntax
+  query:
+    "range": {
+      "response.keyword": {
+        "lt": "600",
+        "gte": "100"
+      }
+    }
+  labels:
+    app: testapp
+server:
+  protocol: http
+  port: 9101
+  path: /metrics
